@@ -1,0 +1,15 @@
+clear
+cd("d:\Patch-micev1\20190916MusV1")
+dirc=dir;
+for i = 1:length(dirc) 
+   if dirc(i).bytes > 5000000
+       filename = strtrim(dirc(i).name);
+       if contains(filename,'_0000')
+           filename(1:9)=[];
+           filename=[filename(1:8) 'MV1A' filename(9:end)];
+           [filename(end-8:end-6)]= '_fp';
+           filename(end-5 : end -4) = [];  
+           copyfile(dirc(i).name,    ['E:\tmp\'    filename]);
+       end
+   end
+end
