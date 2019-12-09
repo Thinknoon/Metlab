@@ -1,0 +1,34 @@
+clear
+cd('D:\4PATCH\20190917MusV1')
+dirfile = dir;
+for i = 3:length(dirfile)
+    filename=strtrim(dirfile(i).name);
+    if strcmp(filename(1:2),'19')
+        filename=['20' dirfile(i).name];
+    else
+    if strcmp(filename(1:3),'mou')
+        filename(1:9)=[];
+    end
+    end
+        filename=[filename(1:8) 'MV1A' filename(9:end)];
+   if contains(filename,'MV1DS1C')
+   strrep(filename,"MV1DS1C","cell");
+   else
+       if contains(filename,'-cell')
+           strrep(filename,'-cell','cell')
+       else
+           if contains(filename,'MICECELL')
+               strrep(filename,'MICECELL','cell')
+           end
+       end
+   end
+    if dirfile(i).bytes ==  5507584
+        [filename(end-8:end-6)]= '_fp';
+        filename(end-5)=[];
+        copyfile(dirfile(i).name,    ['E:\tmp\'    filename]);
+    else
+        [filename(end-8:end-6)]= '_sp';
+         filename(end-5)=[];
+        copyfile(dirfile(i).name,    ['E:\tmp\'    filename]);
+    end
+end
