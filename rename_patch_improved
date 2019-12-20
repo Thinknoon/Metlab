@@ -1,0 +1,80 @@
+clear
+cd('D:\8PATCH\20191125MusV1')
+cur_dir = pwd;
+dir_cell = strsplit(cur_dir,'\');
+exp_mod = char(dir_cell(end-1));
+exp_data_info = char(dir_cell(end));
+exp_data = exp_data_info(1:8);
+exp_obj = "MV1";
+re_name_path = ['E:\patch_rename\',char(dir_cell(end))];
+if exist(re_name_path,'dir')
+    warndlg("路径已存在,不创建文件夹，关闭本消息框，程序继续");
+else
+    mkdir('E:\patch_rename\',char(dir_cell(end)));
+end
+dirfile = dir;
+for i = 3:length(dirfile)
+    filename = strtrim(dirfile(i).name);
+    filesize = dirfile(i).bytes;
+    serial_num = get_serial_num(filename,exp_mod);
+    exp_condition =  get_exp_condition(exp_data,serial_num);
+    if strcmp(exp_mod,'4PATCH')
+        exp_record_mod = get_record_mod(filesize);
+        re_name = char(strcat(exp_data,exp_obj,exp_condition,serial_num,exp_record_mod, '.abf'));
+    else
+        if strcmp(exp_mod,'8PATCH')
+        re_name =  char(strcat(exp_data,exp_obj,exp_condition,serial_num, '.dat_fp'));
+        end
+    end
+    copyfile(dirfile(i).name,[re_name_path,'\',re_name]);
+end
+function [exp_condition] = get_exp_condition(exp_data,serial_num)
+[row_num,row_char] = xlsread("D:\4PATCH\Mouse_V1_cDNA.xlsx");
+exp_data_exl = row_num(1:end,1);
+cell_mod_serial_exl = row_char(2:end,6);
+cell_condition = row_char(2:end,7);
+exp_condition = "initial";
+for j = 1:length(exp_data_exl)
+    exp_data_exltep = num2str(exp_data_exl(j));
+    cell_mod_serial_exltep = char(cell_mod_serial_exl(j));
+    if strcmp(exp_data,exp_data_exltep) && strcmp(serial_num,cell_mod_serial_exltep)
+        exp_condition = char(cell_condition(j));
+    end
+end
+if strcmp(exp_condition,'initial')
+    warndlg([serial_num,"在excel中无记录，关闭对话框后程序继续"]);
+    exp_condition = "NOREC";
+end
+end
+function [cell_mod_serial] = get_serial_num(filename,exp_mod)
+if strcmp(exp_mod,'4PATCH')
+    serial_mod = 'AC';
+    serial_num = filename(end-9);
+    if filename(end-10) > '9'
+        serial_num = ['0',serial_num];
+    else
+        serial_num = [filename(end-10),filename(end-9)];
+    end
+else
+    if  strcmp(exp_mod,'8PATCH')
+     serial_mod = 'HC';
+     serial_num = filename(end-4);
+        if filename(end-5) > '9'
+            serial_num = ['0',serial_num];
+        else
+            serial_num = [filename(end-5),filename(end-4)];
+        end
+    else 
+        warndlg("记录错误,关闭本对话框，程序继续");
+    end
+end
+cell_mod_serial = [serial_mod,serial_num];
+end
+function [record_mod] = get_record_mod(filesize)
+if filesize ==  5507584
+        record_mod =  '_fp';
+    else
+       record_mod = '_sp';
+end
+end
+
